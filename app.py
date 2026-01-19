@@ -255,19 +255,41 @@ def index():
                 if "Sign in to confirm" in error_msg or "confirm you're not a bot" in error_msg or "HTTP Error 403" in error_msg:
                     error_msg = """This YouTube video requires additional authentication.
 
-🎯 <strong>Try a Different YouTube Video:</strong> Many YouTube videos download directly in this web app!"""
+🧪 <strong>Alternative: Run in Google Colab</strong>
+1. Open <a href="https://colab.research.google.com" target="_blank">Google Colab</a>
+2. Run: <code>!pip install yt-dlp</code>
+3. Run: <code>!wget https://raw.githubusercontent.com/bora2025/borader-downloader/main/main.py</code>
+4. Run: <code>!python main.py "YOUR_VIDEO_URL"</code>
+
+✅ <strong>Works for ALL YouTube videos in Colab!</strong>"""
                 elif "Video unavailable" in error_msg or "This video is not available" in error_msg:
                     error_msg = "This YouTube video is not available. It may be private, deleted, or region-restricted."
                 elif "Private video" in error_msg:
                     error_msg = "This is a private YouTube video that cannot be downloaded."
                 elif "Age-restricted" in error_msg or "age-restricted" in error_msg:
-                    error_msg = "This YouTube video is age-restricted. Try setting up cookies for age-restricted content."
+                    error_msg = """This YouTube video is age-restricted.
+
+🧪 <strong>Alternative: Run in Google Colab</strong>
+1. Open <a href="https://colab.research.google.com" target="_blank">Google Colab</a>
+2. Run: <code>!pip install yt-dlp</code>
+3. Run: <code>!wget https://raw.githubusercontent.com/bora2025/borader-downloader/main/main.py</code>
+4. Run: <code>!python main.py "YOUR_VIDEO_URL"</code>
+
+✅ <strong>Works for age-restricted videos in Colab!</strong>"""
                 elif "Region blocked" in error_msg or "not available in your country" in error_msg:
                     error_msg = "This YouTube video is blocked in your region. Try using a VPN."
                 elif "quota" in error_msg.lower():
                     error_msg = "YouTube API quota exceeded. Please try again later."
                 else:
-                    error_msg = f"YouTube download attempted with 4 enhanced strategies. Many YouTube videos work directly in this web app! Try a different video: {error_msg[:100]}..."
+                    error_msg = f"""YouTube download attempted with 4 enhanced strategies.
+
+🧪 <strong>Alternative: Run in Google Colab</strong>
+1. Open <a href="https://colab.research.google.com" target="_blank">Google Colab</a>
+2. Run: <code>!pip install yt-dlp</code>
+3. Run: <code>!wget https://raw.githubusercontent.com/bora2025/borader-downloader/main/main.py</code>
+4. Run: <code>!python main.py "YOUR_VIDEO_URL"</code>
+
+✅ <strong>Works for ALL YouTube videos in Colab!</strong>"""
             else:
                 # Handle non-YouTube errors normally
                 if "Video unavailable" in error_msg or "This video is not available" in error_msg:
