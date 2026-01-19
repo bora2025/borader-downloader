@@ -139,25 +139,28 @@ def index():
             ''')
         
         try:
-            # Try primary configuration first
+            # Strategy 1: Advanced Web Client (Primary)
             ydl_opts = {
                 'outtmpl': os.path.join(tempfile.gettempdir(), '%(title)s.%(ext)s'),
                 'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
                 'merge_output_format': 'mp4',
                 'http_headers': {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
                     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-                    'Accept-Language': 'en-us,en;q=0.5',
-                    'Sec-Fetch-Mode': 'navigate',
+                    'Accept-Language': 'en-US,en;q=0.9',
+                    'Accept-Encoding': 'gzip, deflate, br',
+                    'DNT': '1',
+                    'Connection': 'keep-alive',
+                    'Upgrade-Insecure-Requests': '1',
                     'Sec-Fetch-Dest': 'document',
+                    'Sec-Fetch-Mode': 'navigate',
                     'Sec-Fetch-Site': 'none',
                     'Sec-Fetch-User': '?1',
-                    'Upgrade-Insecure-Requests': '1',
                     'Cache-Control': 'max-age=0',
-                    'DNT': '1',
-                    'Sec-Ch-Ua': '"Not_A Brand";v="8", "Chromium";v="120", "Google Chrome";v="120"',
+                    'Sec-Ch-Ua': '"Google Chrome";v="131", "Chromium";v="131", "Not_A Brand";v="24"',
                     'Sec-Ch-Ua-Mobile': '?0',
                     'Sec-Ch-Ua-Platform': '"Windows"',
+                    'Sec-Ch-Ua-Platform-Version': '"10.0.0"',
                 },
                 'extractor_args': {
                     'youtube': {
@@ -167,10 +170,7 @@ def index():
                         'innertube_context': {
                             'client': {
                                 'clientName': 'WEB',
-                                'clientVersion': '2.20240119.01.00',
-                                'mainAppWebInfo': {
-                                    'graftUrl': '/watch?v=' + url.split('v=')[1] if 'v=' in url else '',
-                                }
+                                'clientVersion': '2.20241206.01.00',
                             }
                         },
                         'formats': 'missing_pot',
@@ -183,8 +183,8 @@ def index():
                 'sleep_interval': 1,
                 'max_sleep_interval': 5,
                 'sleep_interval_requests': 1,
-                'retries': 15,
-                'fragment_retries': 15,
+                'retries': 20,
+                'fragment_retries': 20,
                 'retry_sleep_functions': {
                     'http': lambda n: min(64, 2 ** n),
                     'fragment': lambda n: min(64, 2 ** n),
@@ -195,7 +195,7 @@ def index():
                 'force_generic_extractor': False,
                 'no_warnings': False,
                 'quiet': False,
-                'socket_timeout': 30,
+                'socket_timeout': 60,
                 'buffersize': 1024,
                 'concurrent_fragment_downloads': 1,
                 'throttled_rate': '100K',
@@ -206,50 +206,120 @@ def index():
                     info = ydl.extract_info(url, download=True)
                     filename = ydl.prepare_filename(info)
                     return send_file(filename, as_attachment=True, download_name=os.path.basename(filename))
-            except Exception as primary_error:
-                primary_error_msg = str(primary_error)
+            except Exception as e1:
+                error_msg = str(e1)
                 
-                # If primary method fails with bot detection, try fallback method
-                if "Sign in to confirm" in primary_error_msg or "confirm you're not a bot" in primary_error_msg:
-                    # Fallback configuration - more aggressive approach
-                    fallback_opts = {
+                # Strategy 2: iOS Safari Simulation (Fallback 1)
+                if "Sign in to confirm" in error_msg or "confirm you're not a bot" in error_msg or "Video unavailable" in error_msg:
+                    ios_opts = {
                         'outtmpl': os.path.join(tempfile.gettempdir(), '%(title)s.%(ext)s'),
                         'format': 'best[ext=mp4]/best',
                         'http_headers': {
-                            'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1',
+                            'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Mobile/15E148 Safari/604.1',
                             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
                             'Accept-Language': 'en-US,en;q=0.9',
+                            'Accept-Encoding': 'gzip, deflate, br',
+                            'DNT': '1',
+                            'Connection': 'keep-alive',
+                            'Upgrade-Insecure-Requests': '1',
+                            'Sec-Fetch-Dest': 'document',
                             'Sec-Fetch-Mode': 'navigate',
                             'Sec-Fetch-Site': 'none',
                             'Sec-Fetch-User': '?1',
+                            'Cache-Control': 'max-age=0',
                         },
                         'extractor_args': {
                             'youtube': {
-                                'player_client': ['ios', 'android'],
+                                'player_client': ['ios', 'web'],
                                 'player_skip': ['js'],
                                 'innertube_client': 'ios',
                                 'formats': 'missing_pot',
                             }
                         },
                         'geo_bypass': True,
-                        'sleep_interval': 3,
-                        'retries': 20,
-                        'fragment_retries': 20,
+                        'sleep_interval': 2,
+                        'retries': 25,
+                        'fragment_retries': 25,
                         'no_check_certificate': True,
-                        'socket_timeout': 60,
+                        'socket_timeout': 90,
                     }
                     
                     try:
-                        with yt_dlp.YoutubeDL(fallback_opts) as ydl:
+                        with yt_dlp.YoutubeDL(ios_opts) as ydl:
                             info = ydl.extract_info(url, download=True)
                             filename = ydl.prepare_filename(info)
                             return send_file(filename, as_attachment=True, download_name=os.path.basename(filename))
-                    except Exception as fallback_error:
-                        # If both methods fail, raise the original error
-                        raise primary_error
-                else:
-                    # If it's not a bot detection error, raise the original error
-                    raise primary_error
+                    except Exception as e2:
+                        # Strategy 3: Android App Simulation (Fallback 2)
+                        android_opts = {
+                            'outtmpl': os.path.join(tempfile.gettempdir(), '%(title)s.%(ext)s'),
+                            'format': 'best[ext=mp4]/best',
+                            'http_headers': {
+                                'User-Agent': 'com.google.android.youtube/19.09.36 (Linux; U; Android 11; en_US) gzip',
+                                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                                'Accept-Language': 'en-US,en;q=0.9',
+                                'Accept-Encoding': 'gzip, deflate, br',
+                                'DNT': '1',
+                                'Connection': 'keep-alive',
+                            },
+                            'extractor_args': {
+                                'youtube': {
+                                    'player_client': ['android', 'web'],
+                                    'player_skip': ['js'],
+                                    'innertube_client': 'android',
+                                    'formats': 'missing_pot',
+                                }
+                            },
+                            'geo_bypass': True,
+                            'sleep_interval': 3,
+                            'retries': 30,
+                            'fragment_retries': 30,
+                            'no_check_certificate': True,
+                            'socket_timeout': 120,
+                        }
+                        
+                        try:
+                            with yt_dlp.YoutubeDL(android_opts) as ydl:
+                                info = ydl.extract_info(url, download=True)
+                                filename = ydl.prepare_filename(info)
+                                return send_file(filename, as_attachment=True, download_name=os.path.basename(filename))
+                        except Exception as e3:
+                            # Strategy 4: Desktop TV App Simulation (Final Fallback)
+                            tv_opts = {
+                                'outtmpl': os.path.join(tempfile.gettempdir(), '%(title)s.%(ext)s'),
+                                'format': 'best[ext=mp4]/best',
+                                'http_headers': {
+                                    'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+                                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                                    'Accept-Language': 'en-US,en;q=0.9',
+                                    'Accept-Encoding': 'gzip, deflate, br',
+                                    'DNT': '1',
+                                    'Connection': 'keep-alive',
+                                },
+                                'extractor_args': {
+                                    'youtube': {
+                                        'player_client': ['tv', 'web_embedded'],
+                                        'player_skip': ['js'],
+                                        'innertube_client': 'tv',
+                                        'formats': 'missing_pot',
+                                    }
+                                },
+                                'geo_bypass': True,
+                                'sleep_interval': 5,
+                                'retries': 35,
+                                'fragment_retries': 35,
+                                'no_check_certificate': True,
+                                'socket_timeout': 180,
+                            }
+                            
+                            try:
+                                with yt_dlp.YoutubeDL(tv_opts) as ydl:
+                                    info = ydl.extract_info(url, download=True)
+                                    filename = ydl.prepare_filename(info)
+                                    return send_file(filename, as_attachment=True, download_name=os.path.basename(filename))
+                            except Exception as e4:
+                                # All strategies failed, raise the most relevant error
+                                raise e1
         except Exception as e:
             error_msg = str(e)
             # Handle specific YouTube errors with more aggressive approach

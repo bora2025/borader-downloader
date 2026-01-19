@@ -16,19 +16,22 @@ def download_video(url, output_path='downloads', progress_callback=None):
         'merge_output_format': 'mp4',
         'progress_hooks': [progress_callback] if progress_callback else [],
         'http_headers': {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'Accept-Language': 'en-us,en;q=0.5',
-            'Sec-Fetch-Mode': 'navigate',
+            'Accept-Language': 'en-US,en;q=0.9',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'DNT': '1',
+            'Connection': 'keep-alive',
+            'Upgrade-Insecure-Requests': '1',
             'Sec-Fetch-Dest': 'document',
+            'Sec-Fetch-Mode': 'navigate',
             'Sec-Fetch-Site': 'none',
             'Sec-Fetch-User': '?1',
-            'Upgrade-Insecure-Requests': '1',
             'Cache-Control': 'max-age=0',
-            'DNT': '1',
-            'Sec-Ch-Ua': '"Not_A Brand";v="8", "Chromium";v="120", "Google Chrome";v="120"',
+            'Sec-Ch-Ua': '"Google Chrome";v="131", "Chromium";v="131", "Not_A Brand";v="24"',
             'Sec-Ch-Ua-Mobile': '?0',
             'Sec-Ch-Ua-Platform': '"Windows"',
+            'Sec-Ch-Ua-Platform-Version': '"10.0.0"',
         },
         'extractor_args': {
             'youtube': {
@@ -38,10 +41,7 @@ def download_video(url, output_path='downloads', progress_callback=None):
                 'innertube_context': {
                     'client': {
                         'clientName': 'WEB',
-                        'clientVersion': '2.20240119.01.00',
-                        'mainAppWebInfo': {
-                            'graftUrl': '/watch?v=' + url.split('v=')[1] if 'v=' in url else '',
-                        }
+                        'clientVersion': '2.20241206.01.00',
                     }
                 },
                 'formats': 'missing_pot',
@@ -54,8 +54,8 @@ def download_video(url, output_path='downloads', progress_callback=None):
         'sleep_interval': 1,
         'max_sleep_interval': 5,
         'sleep_interval_requests': 1,
-        'retries': 15,
-        'fragment_retries': 15,
+        'retries': 20,
+        'fragment_retries': 20,
         'retry_sleep_functions': {
             'http': lambda n: min(64, 2 ** n),
             'fragment': lambda n: min(64, 2 ** n),
@@ -66,7 +66,7 @@ def download_video(url, output_path='downloads', progress_callback=None):
         'force_generic_extractor': False,
         'no_warnings': False,
         'quiet': False,
-        'socket_timeout': 30,
+        'socket_timeout': 60,
         'buffersize': 1024,
         'concurrent_fragment_downloads': 1,
         'throttled_rate': '100K',
