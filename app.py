@@ -522,9 +522,8 @@ def index():
                                 </div>
                                 <div class="modal-footer justify-content-center">
                                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                    <a href="https://colab.research.google.com/github/bora2025/borader-downloader/blob/main/BORADER_Colab_Downloader.ipynb"
-                                       target="_blank" class="btn btn-primary" onclick="document.getElementById('colabModal').querySelector('.btn-close').click()">
-                                        🚀 Open Colab & Download
+                                    <a href="#" class="btn btn-primary" id="startColabDownload">
+                                        🚀 Start Download in Colab
                                     </a>
                                 </div>
                             </div>
@@ -538,6 +537,21 @@ def index():
                 // Show modal
                 const modal = new bootstrap.Modal(document.getElementById('colabModal'));
                 modal.show();
+
+                // Set up download button
+                document.getElementById('startColabDownload').addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Encode the video URL for the fragment
+                    const encodedUrl = encodeURIComponent(videoUrl);
+                    const colabUrl = `https://colab.research.google.com/github/bora2025/borader-downloader/blob/main/BORADER_Colab_Downloader_v2.ipynb#video_url=${encodedUrl}`;
+                    
+                    // Open Colab with the URL
+                    window.open(colabUrl, '_blank');
+                    
+                    // Close modal
+                    modal.hide();
+                });
 
                 // Clean up modal after it's hidden
                 document.getElementById('colabModal').addEventListener('hidden.bs.modal', function() {
