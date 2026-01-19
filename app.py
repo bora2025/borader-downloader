@@ -253,30 +253,28 @@ def index():
             # Enhanced error handling with YouTube-specific guidance
             if is_youtube:
                 if "Sign in to confirm" in error_msg or "confirm you're not a bot" in error_msg or "HTTP Error 403" in error_msg:
-                    error_msg = """YouTube requires authentication for this video due to their bot detection policies.
+                    error_msg = """This YouTube video requires additional authentication. Here are your options:
 
-🎯 <strong>BEST SOLUTION:</strong> Use the desktop version - it downloads YouTube videos instantly with no setup!
+🎯 <strong>Try a Different YouTube Video:</strong> Many YouTube videos download directly in this web app!
 
-📱 <strong>Desktop Download:</strong>
+📱 <strong>Desktop Version (Guaranteed Success):</strong>
 1. Download ZIP from GitHub
-2. Extract and run start_gui.bat
-3. Works for ALL YouTube videos!
+2. Extract and run start_gui.bat  
+3. Works for ALL YouTube videos instantly!
 
-🔧 <strong>Alternative:</strong> Set up cookies using our guide, then try again.
-
-🌐 <strong>Web Download:</strong> Some YouTube videos work directly in the web app. Try a different video!"""
+🔧 <strong>Advanced Setup:</strong> Set up cookies using our guide for restricted videos."""
                 elif "Video unavailable" in error_msg or "This video is not available" in error_msg:
                     error_msg = "This YouTube video is not available. It may be private, deleted, or region-restricted."
                 elif "Private video" in error_msg:
                     error_msg = "This is a private YouTube video that cannot be downloaded."
                 elif "Age-restricted" in error_msg or "age-restricted" in error_msg:
-                    error_msg = "This YouTube video is age-restricted. Use the desktop version with proper authentication."
+                    error_msg = "This YouTube video is age-restricted. Try the desktop version with proper authentication."
                 elif "Region blocked" in error_msg or "not available in your country" in error_msg:
                     error_msg = "This YouTube video is blocked in your region. Try using a VPN or the desktop version."
                 elif "quota" in error_msg.lower():
                     error_msg = "YouTube API quota exceeded. Please try again later or use the desktop version."
                 else:
-                    error_msg = f"YouTube download attempted with 4 enhanced strategies. Some videos work directly in web! Try desktop version for guaranteed success: {error_msg[:100]}..."
+                    error_msg = f"YouTube download attempted with 4 enhanced strategies. Many YouTube videos work directly in this web app! Try a different video or use desktop version for guaranteed success: {error_msg[:100]}..."
             else:
                 # Handle non-YouTube errors normally
                 if "Video unavailable" in error_msg or "This video is not available" in error_msg:
