@@ -4,9 +4,11 @@ A powerful application to download videos from YouTube and TikTok with advanced 
 
 ## 🚀 Power Toolkit Features
 
-- **Advanced YouTube Bypass**: Multiple player clients, Android emulation, geo-bypass, and anti-bot countermeasures
+- **Aggressive YouTube Bypass**: 8+ player clients (web, android, ios, web_embedded, tv, web_music, web_creator, mweb) with automatic fallback
+- **Dual-Layer Protection**: Primary web client + iOS/Android fallback for maximum compatibility
+- **Advanced Headers**: Complete browser emulation with Sec-Ch-Ua headers and modern HTTP features
+- **Network Resilience**: 15+ retry attempts with exponential backoff for stable downloads
 - **Direct Downloads**: No authentication required - just paste URL and download
-- **Network Resilience**: Automatic retry mechanisms with exponential backoff for stable downloads
 - **Multi-Platform**: Desktop GUI, CLI, and web app versions
 - **High Compatibility**: Works with YouTube, TikTok, and many other platforms
 - **Mobile Friendly**: PWA support for mobile devices
