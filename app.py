@@ -152,14 +152,23 @@ def index():
                     },
                     'extractor_args': {
                         'youtube': {
-                            'player_client': ['web', 'android', 'ios', 'web_embedded'],
+                            'player_client': ['web', 'android', 'ios', 'web_embedded', 'tv'],
                             'player_skip': ['js'],
                             'innertube_client': 'web',
+                            'innertube_context': {
+                                'client': {
+                                    'clientName': 'ANDROID',
+                                    'clientVersion': '17.31.35',
+                                    'androidSdkVersion': 30,
+                                    'userAgent': 'com.google.android.youtube/17.31.35 (Linux; U; Android 11; en_US) gzip',
+                                }
+                            },
                         }
                     },
                     'geo_bypass': True,
                     'sleep_interval': 1,
                     'no_check_certificate': True,
+                    'ignoreerrors': False,
                 }
                 with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                     info = ydl.extract_info(url, download=True)
@@ -167,8 +176,22 @@ def index():
                     return send_file(filename, as_attachment=True, download_name=os.path.basename(filename))
         except Exception as e:
             error_msg = str(e)
-            if "Sign in to confirm" in error_msg:
+            # Handle specific YouTube errors
+            if "Sign in to confirm" in error_msg or "confirm you're not a bot" in error_msg:
                 error_msg = "This video requires special handling. Some YouTube videos have additional restrictions. Please try a different video or use the local desktop version."
+            elif "Video unavailable" in error_msg or "This video is not available" in error_msg:
+                error_msg = "This video is not available or has been removed. Please check the URL and try again."
+            elif "Private video" in error_msg:
+                error_msg = "This is a private video that cannot be downloaded."
+            elif "Age-restricted" in error_msg or "age-restricted" in error_msg:
+                error_msg = "This video is age-restricted and cannot be downloaded."
+            elif "Region blocked" in error_msg or "not available in your country" in error_msg:
+                error_msg = "This video is not available in your region."
+            elif "HTTP Error 429" in error_msg or "Too Many Requests" in error_msg:
+                error_msg = "Too many requests. Please wait a few minutes and try again."
+            else:
+                # For other errors, provide a generic message but keep some technical details
+                error_msg = f"Download failed: {error_msg[:200]}..." if len(error_msg) > 200 else f"Download failed: {error_msg}"
             return render_template_string('''
             <!DOCTYPE html>
             <html lang="en">
