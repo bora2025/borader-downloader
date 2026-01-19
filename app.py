@@ -489,31 +489,61 @@ def index():
         <script>
             document.getElementById('downloadForm').addEventListener('submit', function(e) {
                 const url = document.getElementById('url').value;
-                
+
                 // Check if it's a YouTube URL
                 if (url.includes('youtube.com') || url.includes('youtu.be')) {
                     e.preventDefault(); // Stop form submission
-                    
-                    // Show loading message
-                    const button = this.querySelector('button[type="submit"]');
-                    const originalText = button.innerHTML;
-                    button.innerHTML = '🚀 Opening Colab...';
-                    button.disabled = true;
-                    
-                    // Redirect to Colab with the URL as a parameter
-                    const colabUrl = 'https://colab.research.google.com/github/bora2025/borader-downloader/blob/main/BORADER_Colab_Downloader.ipynb';
-                    window.open(colabUrl, '_blank');
-                    
-                    // Reset button after a delay
-                    setTimeout(() => {
-                        button.innerHTML = originalText;
-                        button.disabled = false;
-                    }, 2000);
-                    
+
+                    // Show Colab modal instead of direct redirect
+                    showColabModal(url);
+
                     return false;
                 }
                 // For non-YouTube URLs, allow normal form submission
             });
+
+            function showColabModal(videoUrl) {
+                // Create modal HTML
+                const modalHtml = `
+                    <div class="modal fade" id="colabModal" tabindex="-1">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">🎥 YouTube Download</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body text-center">
+                                    <p>YouTube videos download best in Google Colab!</p>
+                                    <div class="mb-3">
+                                        <strong>Your URL:</strong><br>
+                                        <code class="text-break">${videoUrl}</code>
+                                    </div>
+                                    <p>Click below to open Colab and download instantly:</p>
+                                </div>
+                                <div class="modal-footer justify-content-center">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                    <a href="https://colab.research.google.com/github/bora2025/borader-downloader/blob/main/BORADER_Colab_Downloader.ipynb"
+                                       target="_blank" class="btn btn-primary" onclick="document.getElementById('colabModal').querySelector('.btn-close').click()">
+                                        🚀 Open Colab & Download
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                // Add modal to page
+                document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+                // Show modal
+                const modal = new bootstrap.Modal(document.getElementById('colabModal'));
+                modal.show();
+
+                // Clean up modal after it's hidden
+                document.getElementById('colabModal').addEventListener('hidden.bs.modal', function() {
+                    this.remove();
+                });
+            }
         </script>
     </body>
     </html>
