@@ -544,7 +544,7 @@ def index():
                     
                     // Encode the video URL for the fragment
                     const encodedUrl = encodeURIComponent(videoUrl);
-                    const colabUrl = `https://colab.research.google.com/github/bora2025/borader-downloader/blob/main/BORADER_Colab_Downloader_v2.ipynb#video_url=${encodedUrl}`;
+                    const colabUrl = `https://colab.research.google.com/github/bora2025/borader-downloader/blob/main/BORADER_Colab_Downloader_v3.ipynb#video_url=${encodedUrl}`;
                     
                     // Open Colab with the URL
                     window.open(colabUrl, '_blank');
