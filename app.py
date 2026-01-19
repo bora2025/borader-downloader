@@ -139,6 +139,7 @@ def index():
             ''')
         
         try:
+            # Try primary configuration first
             ydl_opts = {
                 'outtmpl': os.path.join(tempfile.gettempdir(), '%(title)s.%(ext)s'),
                 'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
@@ -148,20 +149,42 @@ def index():
                     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
                     'Accept-Language': 'en-us,en;q=0.5',
                     'Sec-Fetch-Mode': 'navigate',
+                    'Sec-Fetch-Dest': 'document',
+                    'Sec-Fetch-Site': 'none',
+                    'Sec-Fetch-User': '?1',
+                    'Upgrade-Insecure-Requests': '1',
+                    'Cache-Control': 'max-age=0',
+                    'DNT': '1',
+                    'Sec-Ch-Ua': '"Not_A Brand";v="8", "Chromium";v="120", "Google Chrome";v="120"',
+                    'Sec-Ch-Ua-Mobile': '?0',
+                    'Sec-Ch-Ua-Platform': '"Windows"',
                 },
                 'extractor_args': {
                     'youtube': {
-                        'player_client': ['android', 'web'],
-                        'player_skip': ['js'],
-                        'innertube_client': 'android',
+                        'player_client': ['web', 'android', 'ios', 'web_embedded', 'tv', 'web_music', 'web_creator', 'mweb'],
+                        'player_skip': ['js', 'webpage'],
+                        'innertube_client': 'web',
+                        'innertube_context': {
+                            'client': {
+                                'clientName': 'WEB',
+                                'clientVersion': '2.20240119.01.00',
+                                'mainAppWebInfo': {
+                                    'graftUrl': '/watch?v=' + url.split('v=')[1] if 'v=' in url else '',
+                                }
+                            }
+                        },
+                        'formats': 'missing_pot',
+                        'innertube_host': 'www.youtube.com',
+                        'innertube_key': 'AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8',
+                        'skip': ['translated_subs', 'automatic_captions'],
                     }
                 },
                 'geo_bypass': True,
-                'sleep_interval': 2,
-                'max_sleep_interval': 10,
-                'sleep_interval_requests': 2,
-                'retries': 10,
-                'fragment_retries': 10,
+                'sleep_interval': 1,
+                'max_sleep_interval': 5,
+                'sleep_interval_requests': 1,
+                'retries': 15,
+                'fragment_retries': 15,
                 'retry_sleep_functions': {
                     'http': lambda n: min(64, 2 ** n),
                     'fragment': lambda n: min(64, 2 ** n),
@@ -174,17 +197,64 @@ def index():
                 'quiet': False,
                 'socket_timeout': 30,
                 'buffersize': 1024,
+                'concurrent_fragment_downloads': 1,
+                'throttled_rate': '100K',
             }
             
-            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                info = ydl.extract_info(url, download=True)
-                filename = ydl.prepare_filename(info)
-                return send_file(filename, as_attachment=True, download_name=os.path.basename(filename))
+            try:
+                with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                    info = ydl.extract_info(url, download=True)
+                    filename = ydl.prepare_filename(info)
+                    return send_file(filename, as_attachment=True, download_name=os.path.basename(filename))
+            except Exception as primary_error:
+                primary_error_msg = str(primary_error)
+                
+                # If primary method fails with bot detection, try fallback method
+                if "Sign in to confirm" in primary_error_msg or "confirm you're not a bot" in primary_error_msg:
+                    # Fallback configuration - more aggressive approach
+                    fallback_opts = {
+                        'outtmpl': os.path.join(tempfile.gettempdir(), '%(title)s.%(ext)s'),
+                        'format': 'best[ext=mp4]/best',
+                        'http_headers': {
+                            'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1',
+                            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                            'Accept-Language': 'en-US,en;q=0.9',
+                            'Sec-Fetch-Mode': 'navigate',
+                            'Sec-Fetch-Site': 'none',
+                            'Sec-Fetch-User': '?1',
+                        },
+                        'extractor_args': {
+                            'youtube': {
+                                'player_client': ['ios', 'android'],
+                                'player_skip': ['js'],
+                                'innertube_client': 'ios',
+                                'formats': 'missing_pot',
+                            }
+                        },
+                        'geo_bypass': True,
+                        'sleep_interval': 3,
+                        'retries': 20,
+                        'fragment_retries': 20,
+                        'no_check_certificate': True,
+                        'socket_timeout': 60,
+                    }
+                    
+                    try:
+                        with yt_dlp.YoutubeDL(fallback_opts) as ydl:
+                            info = ydl.extract_info(url, download=True)
+                            filename = ydl.prepare_filename(info)
+                            return send_file(filename, as_attachment=True, download_name=os.path.basename(filename))
+                    except Exception as fallback_error:
+                        # If both methods fail, raise the original error
+                        raise primary_error
+                else:
+                    # If it's not a bot detection error, raise the original error
+                    raise primary_error
         except Exception as e:
             error_msg = str(e)
-            # Handle specific YouTube errors
+            # Handle specific YouTube errors with more aggressive approach
             if "Sign in to confirm" in error_msg or "confirm you're not a bot" in error_msg:
-                error_msg = "This video requires special handling. Some YouTube videos have additional restrictions. Please try a different video or use the local desktop version."
+                error_msg = "Download failed due to YouTube restrictions. The app tried multiple bypass methods but couldn't access this video. Try a different video or use the desktop version."
             elif "Video unavailable" in error_msg or "This video is not available" in error_msg:
                 error_msg = "This video is not available or has been removed. Please check the URL and try again."
             elif "Private video" in error_msg:

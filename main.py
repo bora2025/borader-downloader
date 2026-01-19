@@ -20,20 +20,42 @@ def download_video(url, output_path='downloads', progress_callback=None):
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
             'Accept-Language': 'en-us,en;q=0.5',
             'Sec-Fetch-Mode': 'navigate',
+            'Sec-Fetch-Dest': 'document',
+            'Sec-Fetch-Site': 'none',
+            'Sec-Fetch-User': '?1',
+            'Upgrade-Insecure-Requests': '1',
+            'Cache-Control': 'max-age=0',
+            'DNT': '1',
+            'Sec-Ch-Ua': '"Not_A Brand";v="8", "Chromium";v="120", "Google Chrome";v="120"',
+            'Sec-Ch-Ua-Mobile': '?0',
+            'Sec-Ch-Ua-Platform': '"Windows"',
         },
         'extractor_args': {
             'youtube': {
-                'player_client': ['android', 'web'],
-                'player_skip': ['js'],
-                'innertube_client': 'android',
+                'player_client': ['web', 'android', 'ios', 'web_embedded', 'tv', 'web_music', 'web_creator', 'mweb'],
+                'player_skip': ['js', 'webpage'],
+                'innertube_client': 'web',
+                'innertube_context': {
+                    'client': {
+                        'clientName': 'WEB',
+                        'clientVersion': '2.20240119.01.00',
+                        'mainAppWebInfo': {
+                            'graftUrl': '/watch?v=' + url.split('v=')[1] if 'v=' in url else '',
+                        }
+                    }
+                },
+                'formats': 'missing_pot',
+                'innertube_host': 'www.youtube.com',
+                'innertube_key': 'AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8',
+                'skip': ['translated_subs', 'automatic_captions'],
             }
         },
         'geo_bypass': True,
-        'sleep_interval': 2,
-        'max_sleep_interval': 10,
-        'sleep_interval_requests': 2,
-        'retries': 10,
-        'fragment_retries': 10,
+        'sleep_interval': 1,
+        'max_sleep_interval': 5,
+        'sleep_interval_requests': 1,
+        'retries': 15,
+        'fragment_retries': 15,
         'retry_sleep_functions': {
             'http': lambda n: min(64, 2 ** n),
             'fragment': lambda n: min(64, 2 ** n),
@@ -46,6 +68,8 @@ def download_video(url, output_path='downloads', progress_callback=None):
         'quiet': False,
         'socket_timeout': 30,
         'buffersize': 1024,
+        'concurrent_fragment_downloads': 1,
+        'throttled_rate': '100K',
     }
     
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
