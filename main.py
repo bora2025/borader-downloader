@@ -20,11 +20,16 @@ def download_video(url, output_path='downloads', progress_callback=None):
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
             'Accept-Language': 'en-us,en;q=0.5',
             'Sec-Fetch-Mode': 'navigate',
+            'Sec-Fetch-Dest': 'document',
+            'Sec-Fetch-Site': 'none',
+            'Sec-Fetch-User': '?1',
+            'Upgrade-Insecure-Requests': '1',
+            'Cache-Control': 'max-age=0',
         },
         'extractor_args': {
             'youtube': {
-                'player_client': ['web', 'android', 'ios', 'web_embedded', 'tv'],
-                'player_skip': ['js'],
+                'player_client': ['web', 'android', 'ios', 'web_embedded', 'tv', 'web_music', 'web_creator'],
+                'player_skip': ['js', 'webpage'],
                 'innertube_client': 'web',
                 'innertube_context': {
                     'client': {
@@ -34,12 +39,21 @@ def download_video(url, output_path='downloads', progress_callback=None):
                         'userAgent': 'com.google.android.youtube/17.31.35 (Linux; U; Android 11; en_US) gzip',
                     }
                 },
+                'formats': 'missing_pot',
+                'innertube_host': 'www.youtube.com',
+                'innertube_key': 'AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8',
             }
         },
         'geo_bypass': True,
         'sleep_interval': 1,
+        'max_sleep_interval': 5,
+        'sleep_interval_requests': 1,
         'no_check_certificate': True,
         'ignoreerrors': False,
+        'extract_flat': False,
+        'force_generic_extractor': False,
+        'no_warnings': False,
+        'quiet': False,
     }
     
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:

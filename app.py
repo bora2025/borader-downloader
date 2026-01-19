@@ -2,6 +2,7 @@ from flask import Flask, request, send_file, render_template_string
 import yt_dlp
 import tempfile
 import os
+import json
 
 app = Flask(__name__)
 
@@ -123,10 +124,15 @@ def index():
                         <h1>🎥 BORADER</h1>
                         <div class="title-separator"></div>
                         <p class="text-danger text-center">Please enter a URL</p>
-                        <form method="post" class="mb-3">
+                        <form method="post" enctype="multipart/form-data" class="mb-3">
                             <div class="mb-3">
                                 <label for="url" class="form-label">Video URL</label>
                                 <input type="url" class="form-control" id="url" name="url" placeholder="https://www.youtube.com/watch?v=..." required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="cookies" class="form-label">YouTube Cookies (Optional - for restricted videos)</label>
+                                <input type="file" class="form-control" id="cookies" name="cookies" accept=".txt,.json">
+                                <div class="form-text">Upload cookies.txt or cookies.json exported from your browser for videos that require authentication</div>
                             </div>
                             <button type="submit" class="btn btn-download btn-lg w-100 text-white">⬇️ Download Video</button>
                         </form>
@@ -139,41 +145,67 @@ def index():
             ''')
         
         try:
-            with tempfile.TemporaryDirectory() as temp_dir:
-                ydl_opts = {
-                    'outtmpl': os.path.join(temp_dir, '%(title)s.%(ext)s'),
-                    'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
-                    'merge_output_format': 'mp4',
-                    'http_headers': {
-                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-                        'Accept-Language': 'en-us,en;q=0.5',
-                        'Sec-Fetch-Mode': 'navigate',
-                    },
-                    'extractor_args': {
-                        'youtube': {
-                            'player_client': ['web', 'android', 'ios', 'web_embedded', 'tv'],
-                            'player_skip': ['js'],
-                            'innertube_client': 'web',
-                            'innertube_context': {
-                                'client': {
-                                    'clientName': 'ANDROID',
-                                    'clientVersion': '17.31.35',
-                                    'androidSdkVersion': 30,
-                                    'userAgent': 'com.google.android.youtube/17.31.35 (Linux; U; Android 11; en_US) gzip',
-                                }
-                            },
-                        }
-                    },
-                    'geo_bypass': True,
-                    'sleep_interval': 1,
-                    'no_check_certificate': True,
-                    'ignoreerrors': False,
-                }
-                with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                    info = ydl.extract_info(url, download=True)
-                    filename = ydl.prepare_filename(info)
-                    return send_file(filename, as_attachment=True, download_name=os.path.basename(filename))
+            cookie_file = request.files.get('cookies')
+            cookie_path = None
+            
+            if cookie_file and cookie_file.filename:
+                # Save uploaded cookie file temporarily
+                cookie_path = os.path.join(tempfile.gettempdir(), 'cookies.txt')
+                cookie_file.save(cookie_path)
+            
+            ydl_opts = {
+                'outtmpl': os.path.join(tempfile.gettempdir(), '%(title)s.%(ext)s'),
+                'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
+                'merge_output_format': 'mp4',
+                'http_headers': {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                    'Accept-Language': 'en-us,en;q=0.5',
+                    'Sec-Fetch-Mode': 'navigate',
+                    'Sec-Fetch-Dest': 'document',
+                    'Sec-Fetch-Site': 'none',
+                    'Sec-Fetch-User': '?1',
+                    'Upgrade-Insecure-Requests': '1',
+                    'Cache-Control': 'max-age=0',
+                },
+                'extractor_args': {
+                    'youtube': {
+                        'player_client': ['web', 'android', 'ios', 'web_embedded', 'tv', 'web_music', 'web_creator'],
+                        'player_skip': ['js', 'webpage'],
+                        'innertube_client': 'web',
+                        'innertube_context': {
+                            'client': {
+                                'clientName': 'ANDROID',
+                                'clientVersion': '17.31.35',
+                                'androidSdkVersion': 30,
+                                'userAgent': 'com.google.android.youtube/17.31.35 (Linux; U; Android 11; en_US) gzip',
+                            }
+                        },
+                        'formats': 'missing_pot',
+                        'innertube_host': 'www.youtube.com',
+                        'innertube_key': 'AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8',
+                    }
+                },
+                'geo_bypass': True,
+                'sleep_interval': 1,
+                'max_sleep_interval': 5,
+                'sleep_interval_requests': 1,
+                'no_check_certificate': True,
+                'ignoreerrors': False,
+                'extract_flat': False,
+                'force_generic_extractor': False,
+                'no_warnings': False,
+                'quiet': False,
+            }
+            
+            # Add cookie file if provided
+            if cookie_path:
+                ydl_opts['cookiefile'] = cookie_path
+            
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                info = ydl.extract_info(url, download=True)
+                filename = ydl.prepare_filename(info)
+                return send_file(filename, as_attachment=True, download_name=os.path.basename(filename))
         except Exception as e:
             error_msg = str(e)
             # Handle specific YouTube errors
@@ -372,20 +404,30 @@ def index():
                         <h1>🎥 BORADER</h1>
                         <div class="title-separator"></div>
                 <p class="text-center text-muted mb-4">Download videos from YouTube, TikTok, and more in MP4 format</p>
-                <form method="post" class="mb-3">
+                <form method="post" enctype="multipart/form-data" class="mb-3">
                     <div class="mb-3">
                         <label for="url" class="form-label fw-bold">Video URL</label>
                         <input type="url" class="form-control form-control-lg" id="url" name="url" placeholder="https://www.youtube.com/watch?v=..." required>
                     </div>
+                    <div class="mb-3">
+                        <label for="cookies" class="form-label fw-bold">YouTube Cookies (Optional)</label>
+                        <input type="file" class="form-control" id="cookies" name="cookies" accept=".txt,.json">
+                        <div class="form-text text-muted">Upload cookies.txt or cookies.json for restricted videos. <a href="#" onclick="showCookieGuide()" class="text-primary">How to get cookies?</a></div>
+                    </div>
                     <button type="submit" class="btn btn-download btn-lg w-100 text-white fw-bold">⬇️ Download Video</button>
                 </form>
                 <div class="text-center">
-                    <small class="text-muted">Fast, secure, and free. No registration required.</small><br>
+                    <small class="text-muted">🚀 <strong>Power Toolkit:</strong> Advanced YouTube bypass + Optional cookie support for maximum compatibility</small><br>
                     <small class="text-muted">📱 Mobile users: Videos download to your device's default Downloads folder. You can move them to Gallery from there.</small>
                 </div>
             </div>
         </div>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <script>
+            function showCookieGuide() {
+                alert('How to get YouTube cookies:\\n\\n1. Install "Get cookies.txt" extension for Chrome/Firefox\\n2. Go to youtube.com and login\\n3. Click the extension icon\\n4. Export cookies as "cookies.txt"\\n5. Upload the file here\\n\\nThis helps with age-restricted or private videos.');
+            }
+        </script>
     </body>
     </html>
     ''')
