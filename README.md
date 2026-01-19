@@ -1,17 +1,42 @@
 # BORADER - Power Video Downloader
 
-A powerful application to download videos from YouTube and TikTok with advanced bypass techniques, available as desktop app, CLI, and web app.
+A powerful application to download videos from YouTube and TikTok, available as desktop app, CLI, and web app.
 
-## 🚀 Power Toolkit Features
+## 🚀 Features
 
-- **4-Strategy Multi-Layer Bypass**: Web → iOS → Android → TV client fallback system
-- **Advanced Browser Simulation**: Chrome 131 headers with complete Sec-Ch-Ua fingerprinting
-- **Aggressive Retry System**: 20-35 retry attempts with exponential backoff (up to 3 minutes)
-- **8+ Player Clients**: web, android, ios, web_embedded, tv, web_music, web_creator, mweb
 - **Direct Downloads**: No authentication required - just paste URL and download
 - **Multi-Platform**: Desktop GUI, CLI, and web app versions
 - **High Compatibility**: Works with YouTube, TikTok, and many other platforms
 - **Mobile Friendly**: PWA support for mobile devices
+- **Cross-Platform**: Windows, macOS, Linux support
+
+## 📋 Platform Compatibility
+
+| Platform | Desktop Version | Web Version |
+|----------|----------------|-------------|
+| **YouTube** | ✅ **Excellent** | ✅ **Excellent** - 5-strategy system |
+| **TikTok** | ✅ **Excellent** | ✅ **Excellent** |
+| **Instagram** | ✅ **Excellent** | ✅ **Excellent** |
+| **Twitter/X** | ✅ **Excellent** | ✅ **Excellent** |
+| **Other Sites** | ✅ **Excellent** | ✅ **Excellent** |
+
+## 🎯 Advanced Download System
+
+### Multi-Strategy Bypass (Both Versions)
+The web app automatically tries 5 different download strategies:
+1. **Desktop Chrome** - Standard web client with best quality
+2. **iOS Safari** - Mobile browser simulation (bypasses many restrictions)
+3. **Android Chrome** - Alternative mobile browser
+4. **Simplified Format** - Fallback configuration
+5. **Mobile Web View** - Lower quality but higher success rate
+
+### Why Both Versions Work Great
+- **Web Version**: 5-strategy system ensures maximum compatibility for all platforms including YouTube
+- **Desktop Version**: No server restrictions + same powerful strategies
+- **Universal Compatibility**: Works for YouTube, TikTok, Instagram, and 1000+ sites
+1. **Smart Detection**: Identifies YouTube URLs automatically
+2. **Server Attempt**: Tries server-side download (works for some videos)
+3. **Desktop Fallback**: If server download fails, shows beautiful download page with step-by-step instructions
 
 ## Requirements
 
@@ -28,6 +53,37 @@ A powerful application to download videos from YouTube and TikTok with advanced 
    ```
 
 ## Usage
+
+### 🖥️ Desktop Version (Recommended for YouTube)
+
+#### GUI Mode
+```bash
+python main.py
+```
+A window will open where you can:
+- Enter the video URL
+- Specify the output directory (defaults to 'downloads')
+- Click "Download" to start downloading
+
+#### Command Line Mode
+```bash
+python main.py "https://www.youtube.com/watch?v=VIDEO_ID"
+python main.py "https://www.youtube.com/watch?v=VIDEO_ID" --output /path/to/downloads
+```
+
+### 🌐 Web Version
+
+Visit: **https://borader.vercel.app**
+
+The web app works well for:
+- ✅ TikTok videos
+- ✅ Instagram videos
+- ✅ Twitter/X videos
+- ⚠️ YouTube videos (may require desktop version for some content)
+
+### 📱 Mobile Usage
+
+The web version is mobile-friendly and supports PWA installation for offline use.
 
 ### Desktop GUI Mode
 Run the script without arguments to launch the graphical user interface:

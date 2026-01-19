@@ -1,2 +1,12 @@
 downloads/
+test_downloads/
+*.webm
+*.mp4
+__pycache__/
+.venv/
+.wrangler/
 .vercel
+cookies.txt
+*.log
+.DS_Store
+Thumbs.db

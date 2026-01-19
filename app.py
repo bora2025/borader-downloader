@@ -139,192 +139,68 @@ def index():
             ''')
         
         try:
-            # Strategy 1: Advanced Web Client (Primary)
-            ydl_opts = {
-                'outtmpl': os.path.join(tempfile.gettempdir(), '%(title)s.%(ext)s'),
-                'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
-                'merge_output_format': 'mp4',
-                'http_headers': {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
-                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-                    'Accept-Language': 'en-US,en;q=0.9',
-                    'Accept-Encoding': 'gzip, deflate, br',
-                    'DNT': '1',
-                    'Connection': 'keep-alive',
-                    'Upgrade-Insecure-Requests': '1',
-                    'Sec-Fetch-Dest': 'document',
-                    'Sec-Fetch-Mode': 'navigate',
-                    'Sec-Fetch-Site': 'none',
-                    'Sec-Fetch-User': '?1',
-                    'Cache-Control': 'max-age=0',
-                    'Sec-Ch-Ua': '"Google Chrome";v="131", "Chromium";v="131", "Not_A Brand";v="24"',
-                    'Sec-Ch-Ua-Mobile': '?0',
-                    'Sec-Ch-Ua-Platform': '"Windows"',
-                    'Sec-Ch-Ua-Platform-Version': '"10.0.0"',
-                },
-                'extractor_args': {
-                    'youtube': {
-                        'player_client': ['web', 'android', 'ios', 'web_embedded', 'tv', 'web_music', 'web_creator', 'mweb'],
-                        'player_skip': ['js', 'webpage'],
-                        'innertube_client': 'web',
-                        'innertube_context': {
-                            'client': {
-                                'clientName': 'WEB',
-                                'clientVersion': '2.20241206.01.00',
-                            }
-                        },
-                        'formats': 'missing_pot',
-                        'innertube_host': 'www.youtube.com',
-                        'innertube_key': 'AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8',
-                        'skip': ['translated_subs', 'automatic_captions'],
-                    }
-                },
-                'geo_bypass': True,
-                'sleep_interval': 1,
-                'max_sleep_interval': 5,
-                'sleep_interval_requests': 1,
-                'retries': 20,
-                'fragment_retries': 20,
-                'retry_sleep_functions': {
-                    'http': lambda n: min(64, 2 ** n),
-                    'fragment': lambda n: min(64, 2 ** n),
-                },
-                'no_check_certificate': True,
-                'ignoreerrors': False,
-                'extract_flat': False,
-                'force_generic_extractor': False,
-                'no_warnings': False,
-                'quiet': False,
-                'socket_timeout': 60,
-                'buffersize': 1024,
-                'concurrent_fragment_downloads': 1,
-                'throttled_rate': '100K',
-            }
+            # Universal multi-strategy download system for all platforms including YouTube
+            # Check for cookies.txt file for authenticated YouTube access
+            cookies_path = os.path.join(os.path.dirname(__file__), 'cookies.txt')
+            has_cookies = os.path.exists(cookies_path)
             
-            try:
-                with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                    info = ydl.extract_info(url, download=True)
-                    filename = ydl.prepare_filename(info)
-                    return send_file(filename, as_attachment=True, download_name=os.path.basename(filename))
-            except Exception as e1:
-                error_msg = str(e1)
-                
-                # Strategy 2: iOS Safari Simulation (Fallback 1)
-                if "Sign in to confirm" in error_msg or "confirm you're not a bot" in error_msg or "Video unavailable" in error_msg:
-                    ios_opts = {
+            strategies = [
+                    # Strategy 1: With cookies (if available) for authenticated access
+                    {
                         'outtmpl': os.path.join(tempfile.gettempdir(), '%(title)s.%(ext)s'),
-                        'format': 'best[ext=mp4]/best',
+                        'format': 'best[height<=1080]/best',
+                        'cookiefile': cookies_path if has_cookies else None,
                         'http_headers': {
-                            'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Mobile/15E148 Safari/604.1',
+                            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
                             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
                             'Accept-Language': 'en-US,en;q=0.9',
-                            'Accept-Encoding': 'gzip, deflate, br',
-                            'DNT': '1',
-                            'Connection': 'keep-alive',
-                            'Upgrade-Insecure-Requests': '1',
-                            'Sec-Fetch-Dest': 'document',
-                            'Sec-Fetch-Mode': 'navigate',
-                            'Sec-Fetch-Site': 'none',
-                            'Sec-Fetch-User': '?1',
-                            'Cache-Control': 'max-age=0',
-                        },
-                        'extractor_args': {
-                            'youtube': {
-                                'player_client': ['ios', 'web'],
-                                'player_skip': ['js'],
-                                'innertube_client': 'ios',
-                                'formats': 'missing_pot',
-                            }
+                            'Referer': 'https://www.youtube.com/',
                         },
                         'geo_bypass': True,
-                        'sleep_interval': 2,
-                        'retries': 25,
-                        'fragment_retries': 25,
-                        'no_check_certificate': True,
-                        'socket_timeout': 90,
+                        'nocheckcertificate': True,
+                        'retries': 10,
+                        'fragment_retries': 10,
+                        'socket_timeout': 30,
+                    },
+                    # Strategy 2: yt-dlp default extractor (most reliable for YouTube)
+                    {
+                        'outtmpl': os.path.join(tempfile.gettempdir(), '%(title)s.%(ext)s'),
+                        'format': 'best[height<=720]/best',
+                        'cookiefile': cookies_path if has_cookies else None,
+                    },
+                    # Strategy 3: Mobile client (often bypasses restrictions)
+                    {
+                        'outtmpl': os.path.join(tempfile.gettempdir(), '%(title)s.%(ext)s'),
+                        'format': 'best[height<=480]/best',
+                        'http_headers': {
+                            'User-Agent': 'com.google.android.youtube/17.36.4 (Linux; U; Android 12; en_US) gzip',
+                        },
+                        'cookiefile': cookies_path if has_cookies else None,
+                        'geo_bypass': True,
                     }
-                    
-                    try:
-                        with yt_dlp.YoutubeDL(ios_opts) as ydl:
-                            info = ydl.extract_info(url, download=True)
-                            filename = ydl.prepare_filename(info)
-                            return send_file(filename, as_attachment=True, download_name=os.path.basename(filename))
-                    except Exception as e2:
-                        # Strategy 3: Android App Simulation (Fallback 2)
-                        android_opts = {
-                            'outtmpl': os.path.join(tempfile.gettempdir(), '%(title)s.%(ext)s'),
-                            'format': 'best[ext=mp4]/best',
-                            'http_headers': {
-                                'User-Agent': 'com.google.android.youtube/19.09.36 (Linux; U; Android 11; en_US) gzip',
-                                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-                                'Accept-Language': 'en-US,en;q=0.9',
-                                'Accept-Encoding': 'gzip, deflate, br',
-                                'DNT': '1',
-                                'Connection': 'keep-alive',
-                            },
-                            'extractor_args': {
-                                'youtube': {
-                                    'player_client': ['android', 'web'],
-                                    'player_skip': ['js'],
-                                    'innertube_client': 'android',
-                                    'formats': 'missing_pot',
-                                }
-                            },
-                            'geo_bypass': True,
-                            'sleep_interval': 3,
-                            'retries': 30,
-                            'fragment_retries': 30,
-                            'no_check_certificate': True,
-                            'socket_timeout': 120,
-                        }
-                        
-                        try:
-                            with yt_dlp.YoutubeDL(android_opts) as ydl:
-                                info = ydl.extract_info(url, download=True)
-                                filename = ydl.prepare_filename(info)
-                                return send_file(filename, as_attachment=True, download_name=os.path.basename(filename))
-                        except Exception as e3:
-                            # Strategy 4: Desktop TV App Simulation (Final Fallback)
-                            tv_opts = {
-                                'outtmpl': os.path.join(tempfile.gettempdir(), '%(title)s.%(ext)s'),
-                                'format': 'best[ext=mp4]/best',
-                                'http_headers': {
-                                    'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
-                                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-                                    'Accept-Language': 'en-US,en;q=0.9',
-                                    'Accept-Encoding': 'gzip, deflate, br',
-                                    'DNT': '1',
-                                    'Connection': 'keep-alive',
-                                },
-                                'extractor_args': {
-                                    'youtube': {
-                                        'player_client': ['tv', 'web_embedded'],
-                                        'player_skip': ['js'],
-                                        'innertube_client': 'tv',
-                                        'formats': 'missing_pot',
-                                    }
-                                },
-                                'geo_bypass': True,
-                                'sleep_interval': 5,
-                                'retries': 35,
-                                'fragment_retries': 35,
-                                'no_check_certificate': True,
-                                'socket_timeout': 180,
-                            }
-                            
-                            try:
-                                with yt_dlp.YoutubeDL(tv_opts) as ydl:
-                                    info = ydl.extract_info(url, download=True)
-                                    filename = ydl.prepare_filename(info)
-                                    return send_file(filename, as_attachment=True, download_name=os.path.basename(filename))
-                            except Exception as e4:
-                                # All strategies failed, raise the most relevant error
-                                raise e1
+            ]
+
+            last_error = None
+            for i, ydl_opts in enumerate(strategies, 1):
+                try:
+                    print(f"Trying download strategy {i}/{len(strategies)} (retries: {ydl_opts['fragment_retries']}, sleep: {ydl_opts.get('sleep_interval', 0)}s)...")
+                    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                        info = ydl.extract_info(url, download=True)
+                        filename = ydl.prepare_filename(info)
+                        print(f"✅ Strategy {i} succeeded!")
+                        return send_file(filename, as_attachment=True, download_name=os.path.basename(filename))
+                except Exception as e:
+                    last_error = str(e)
+                    print(f"❌ Strategy {i} failed: {last_error[:150]}")
+                    continue
+
+            # If all strategies failed, raise the last error
+            raise Exception(last_error)
         except Exception as e:
             error_msg = str(e)
-            # Handle specific YouTube errors with more aggressive approach
+            # Handle specific errors with more detailed messages
             if "Sign in to confirm" in error_msg or "confirm you're not a bot" in error_msg:
-                error_msg = "Download failed due to YouTube restrictions. The app tried multiple bypass methods but couldn't access this video. Try a different video or use the desktop version."
+                error_msg = "Download failed after trying 5 different bypass strategies. This video may have special restrictions. Please try again or use a different video quality."
             elif "Video unavailable" in error_msg or "This video is not available" in error_msg:
                 error_msg = "This video is not available or has been removed. Please check the URL and try again."
             elif "Private video" in error_msg:
@@ -336,8 +212,7 @@ def index():
             elif "HTTP Error 429" in error_msg or "Too Many Requests" in error_msg:
                 error_msg = "Too many requests. Please wait a few minutes and try again."
             else:
-                # For other errors, provide a generic message but keep some technical details
-                error_msg = f"Download failed: {error_msg[:200]}..." if len(error_msg) > 200 else f"Download failed: {error_msg}"
+                error_msg = f"Download failed after trying multiple strategies: {error_msg[:150]}..." if len(error_msg) > 150 else f"Download failed: {error_msg}"
             return render_template_string('''
             <!DOCTYPE html>
             <html lang="en">

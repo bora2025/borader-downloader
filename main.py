@@ -17,59 +17,11 @@ def download_video(url, output_path='downloads', progress_callback=None):
         'progress_hooks': [progress_callback] if progress_callback else [],
         'http_headers': {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'Accept-Language': 'en-US,en;q=0.9',
-            'Accept-Encoding': 'gzip, deflate, br',
-            'DNT': '1',
-            'Connection': 'keep-alive',
-            'Upgrade-Insecure-Requests': '1',
-            'Sec-Fetch-Dest': 'document',
-            'Sec-Fetch-Mode': 'navigate',
-            'Sec-Fetch-Site': 'none',
-            'Sec-Fetch-User': '?1',
-            'Cache-Control': 'max-age=0',
-            'Sec-Ch-Ua': '"Google Chrome";v="131", "Chromium";v="131", "Not_A Brand";v="24"',
-            'Sec-Ch-Ua-Mobile': '?0',
-            'Sec-Ch-Ua-Platform': '"Windows"',
-            'Sec-Ch-Ua-Platform-Version': '"10.0.0"',
-        },
-        'extractor_args': {
-            'youtube': {
-                'player_client': ['web', 'android', 'ios', 'web_embedded', 'tv', 'web_music', 'web_creator', 'mweb'],
-                'player_skip': ['js', 'webpage'],
-                'innertube_client': 'web',
-                'innertube_context': {
-                    'client': {
-                        'clientName': 'WEB',
-                        'clientVersion': '2.20241206.01.00',
-                    }
-                },
-                'formats': 'missing_pot',
-                'innertube_host': 'www.youtube.com',
-                'innertube_key': 'AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8',
-                'skip': ['translated_subs', 'automatic_captions'],
-            }
         },
         'geo_bypass': True,
-        'sleep_interval': 1,
-        'max_sleep_interval': 5,
-        'sleep_interval_requests': 1,
-        'retries': 20,
-        'fragment_retries': 20,
-        'retry_sleep_functions': {
-            'http': lambda n: min(64, 2 ** n),
-            'fragment': lambda n: min(64, 2 ** n),
-        },
-        'no_check_certificate': True,
-        'ignoreerrors': False,
-        'extract_flat': False,
-        'force_generic_extractor': False,
-        'no_warnings': False,
-        'quiet': False,
-        'socket_timeout': 60,
-        'buffersize': 1024,
-        'concurrent_fragment_downloads': 1,
-        'throttled_rate': '100K',
+        'retries': 10,
+        'fragment_retries': 10,
+        'socket_timeout': 30,
     }
     
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
