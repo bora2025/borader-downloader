@@ -10,3 +10,4 @@ cookies.txt
 *.log
 .DS_Store
 Thumbs.db
+.env*.local
