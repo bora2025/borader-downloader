@@ -15,6 +15,31 @@ def download_video(url, output_path='downloads', progress_callback=None):
         'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
         'merge_output_format': 'mp4',
         'progress_hooks': [progress_callback] if progress_callback else [],
+        'http_headers': {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Language': 'en-us,en;q=0.5',
+            'Sec-Fetch-Mode': 'navigate',
+        },
+        'extractor_args': {
+            'youtube': {
+                'player_client': ['web', 'android', 'ios', 'web_embedded', 'tv'],
+                'player_skip': ['js'],
+                'innertube_client': 'web',
+                'innertube_context': {
+                    'client': {
+                        'clientName': 'ANDROID',
+                        'clientVersion': '17.31.35',
+                        'androidSdkVersion': 30,
+                        'userAgent': 'com.google.android.youtube/17.31.35 (Linux; U; Android 11; en_US) gzip',
+                    }
+                },
+            }
+        },
+        'geo_bypass': True,
+        'sleep_interval': 1,
+        'no_check_certificate': True,
+        'ignoreerrors': False,
     }
     
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
