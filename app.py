@@ -255,9 +255,7 @@ def index():
                 if "Sign in to confirm" in error_msg or "confirm you're not a bot" in error_msg or "HTTP Error 403" in error_msg:
                     error_msg = """This YouTube video requires additional authentication.
 
-🎯 <strong>Try a Different YouTube Video:</strong> Many YouTube videos download directly in this web app!
-
-🔧 <strong>Advanced Setup:</strong> Set up cookies using our guide for restricted videos."""
+🎯 <strong>Try a Different YouTube Video:</strong> Many YouTube videos download directly in this web app!"""
                 elif "Video unavailable" in error_msg or "This video is not available" in error_msg:
                     error_msg = "This YouTube video is not available. It may be private, deleted, or region-restricted."
                 elif "Private video" in error_msg:
