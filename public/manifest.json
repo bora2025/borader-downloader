@@ -1,0 +1,16 @@
+{
+  "name": "BORADER",
+  "short_name": "BORADER",
+  "description": "Download videos from YouTube, TikTok and more in MP4 format",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f5f7fa",
+  "theme_color": "#667eea",
+  "icons": [
+    {
+      "src": "/img/Phka Ramdol.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}

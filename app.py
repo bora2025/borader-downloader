@@ -1,0 +1,371 @@
+from flask import Flask, request, send_file, render_template_string
+import yt_dlp
+import tempfile
+import os
+
+app = Flask(__name__)
+
+@app.route('/', methods=['GET', 'POST'])
+def index():
+    if request.method == 'POST':
+        url = request.form.get('url')
+        if not url:
+            return render_template_string('''
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>BORADER</title>
+                <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+                <link rel="manifest" href="/manifest.json">
+                <meta name="theme-color" content="#667eea">
+                <style>
+                    body {
+                        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+                        min-height: 100vh;
+                        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                        margin: 0;
+                        padding: 20px 15px;
+                    }
+                    .card {
+                        border: none;
+                        border-radius: 20px;
+                        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+                        backdrop-filter: blur(10px);
+                        background: rgba(255, 255, 255, 0.95);
+                        transition: transform 0.3s ease, box-shadow 0.3s ease;
+                    }
+                    .card:hover {
+                        transform: translateY(-5px);
+                        box-shadow: 0 30px 60px rgba(0,0,0,0.15);
+                    }
+                    .btn-download {
+                        background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+                        border: none;
+                        border-radius: 12px;
+                        font-weight: 600;
+                        letter-spacing: 0.5px;
+                        transition: all 0.3s ease;
+                        position: relative;
+                        overflow: hidden;
+                    }
+                    .btn-download:hover {
+                        transform: translateY(-2px);
+                        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+                    }
+                    .btn-download:active {
+                        transform: translateY(0);
+                    }
+                    .form-control {
+                        border-radius: 12px;
+                        border: 2px solid #e1e5e9;
+                        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+                    }
+                    .form-control:focus {
+                        border-color: #667eea;
+                        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+                    }
+                    .form-label {
+                        font-weight: 600;
+                        color: #495057;
+                        margin-bottom: 8px;
+                    }
+                    h1 {
+                        font-weight: 700;
+                        background: linear-gradient(45deg, #667eea, #764ba2);
+                        -webkit-background-clip: text;
+                        -webkit-text-fill-color: transparent;
+                        background-clip: text;
+                        margin-bottom: 1rem;
+                        text-align: center;
+                    }
+                    .logo-container {
+                        text-align: center;
+                        margin-bottom: 1rem;
+                    }
+                    .logo-container img {
+                        max-width: 100%;
+                        height: auto;
+                        max-height: 120px;
+                    }
+                    .title-separator {
+                        width: 100%;
+                        height: 2px;
+                        background: linear-gradient(90deg, transparent, #667eea, transparent);
+                        margin: 1rem 0;
+                    }
+                    .text-muted {
+                        color: #6c757d !important;
+                    }
+                    .progress {
+                        height: 25px;
+                        border-radius: 12px;
+                    }
+                    @media (max-width: 576px) {
+                        .card {
+                            margin: 10px;
+                            padding: 2rem 1.5rem !important;
+                        }
+                        body {
+                            padding: 10px 5px;
+                        }
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="container d-flex align-items-center justify-content-center min-vh-100">
+                    <div class="card p-5 w-100" style="max-width: 500px;">
+                        <div class="logo-container">
+                            <img src="/img/Phka Ramdol.png" alt="Logo">
+                        </div>
+                        <div class="title-separator"></div>
+                        <h1>🎥 BORADER</h1>
+                        <div class="title-separator"></div>
+                        <p class="text-danger text-center">Please enter a URL</p>
+                        <form method="post" class="mb-3">
+                            <div class="mb-3">
+                                <label for="url" class="form-label">Video URL</label>
+                                <input type="url" class="form-control" id="url" name="url" placeholder="https://www.youtube.com/watch?v=..." required>
+                            </div>
+                            <button type="submit" class="btn btn-download btn-lg w-100 text-white">⬇️ Download Video</button>
+                        </form>
+                        <p class="text-muted text-center small">Supports YouTube, TikTok, and more. Downloads in MP4 format.</p>
+                    </div>
+                </div>
+                <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+            </body>
+            </html>
+            ''')
+        
+        try:
+            with tempfile.TemporaryDirectory() as temp_dir:
+                ydl_opts = {
+                    'outtmpl': os.path.join(temp_dir, '%(title)s.%(ext)s'),
+                    'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
+                    'merge_output_format': 'mp4',
+                    'http_headers': {
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                        'Accept-Language': 'en-us,en;q=0.5',
+                        'Sec-Fetch-Mode': 'navigate',
+                    },
+                    'extractor_args': {
+                        'youtube': {
+                            'player_client': ['web', 'android', 'ios', 'web_embedded'],
+                            'player_skip': ['js'],
+                            'innertube_client': 'web',
+                        }
+                    },
+                    'geo_bypass': True,
+                    'sleep_interval': 1,
+                    'no_check_certificate': True,
+                }
+                with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                    info = ydl.extract_info(url, download=True)
+                    filename = ydl.prepare_filename(info)
+                    return send_file(filename, as_attachment=True, download_name=os.path.basename(filename))
+        except Exception as e:
+            error_msg = str(e)
+            if "Sign in to confirm" in error_msg:
+                error_msg = "This video requires special handling. Some YouTube videos have additional restrictions. Please try a different video or use the local desktop version."
+            return render_template_string('''
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>BORADER - Error</title>
+                <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+                <link rel="manifest" href="/manifest.json">
+                <meta name="theme-color" content="#667eea">
+                <style>
+                    body {
+                        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+                        min-height: 100vh;
+                        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                        margin: 0;
+                        padding: 20px 15px;
+                    }
+                    .card {
+                        border: none;
+                        border-radius: 20px;
+                        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+                        backdrop-filter: blur(10px);
+                        background: rgba(255, 255, 255, 0.95);
+                    }
+                    .logo-container {
+                        text-align: center;
+                        margin-bottom: 1rem;
+                    }
+                    .logo-container img {
+                        max-width: 100%;
+                        height: auto;
+                        max-height: 120px;
+                    }
+                    .title-separator {
+                        width: 100%;
+                        height: 2px;
+                        background: linear-gradient(90deg, transparent, #667eea, transparent);
+                        margin: 1rem 0;
+                    }
+                    @media (max-width: 576px) {
+                        .card {
+                            margin: 10px;
+                            padding: 2rem 1.5rem !important;
+                        }
+                        body {
+                            padding: 10px 5px;
+                        }
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="container d-flex align-items-center justify-content-center min-vh-100">
+                    <div class="card p-5 w-100" style="max-width: 500px;">
+                        <div class="logo-container">
+                            <img src="/img/Phka Ramdol.png" alt="Logo">
+                        </div>
+                        <div class="title-separator"></div>
+                        <h1>❌ Error</h1>
+                        <div class="title-separator"></div>
+                        <p class="text-danger text-center">''' + error_msg + '''</p>
+                        <div class="text-center">
+                            <button class="btn btn-secondary" onclick="window.location.href='/'">⬅️ Back</button>
+                        </div>
+                    </div>
+                </div>
+                <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+            </body>
+            </html>
+            ''')
+    
+    return render_template_string('''
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>BORADER</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="manifest" href="/manifest.json">
+        <meta name="theme-color" content="#667eea">
+        <style>
+            body {
+                background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+                min-height: 100vh;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                margin: 0;
+                padding: 20px 15px;
+            }
+            .card {
+                border: none;
+                border-radius: 20px;
+                box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+                backdrop-filter: blur(10px);
+                background: rgba(255, 255, 255, 0.95);
+                transition: transform 0.3s ease, box-shadow 0.3s ease;
+            }
+            .card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 30px 60px rgba(0,0,0,0.15);
+            }
+            .btn-download {
+                background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+                border: none;
+                border-radius: 12px;
+                font-weight: 600;
+                letter-spacing: 0.5px;
+                transition: all 0.3s ease;
+                position: relative;
+                overflow: hidden;
+            }
+            .btn-download:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+            }
+            .btn-download:active {
+                transform: translateY(0);
+            }
+            .form-control {
+                border-radius: 12px;
+                border: 2px solid #e1e5e9;
+                transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            }
+            .form-control:focus {
+                border-color: #667eea;
+                box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+            }
+            .form-label {
+                font-weight: 600;
+                color: #495057;
+                margin-bottom: 8px;
+            }
+            h1 {
+                font-weight: 700;
+                background: linear-gradient(45deg, #667eea, #764ba2);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+                margin-bottom: 1rem;
+                text-align: center;
+            }
+            .logo-container {
+                text-align: center;
+                margin-bottom: 1rem;
+            }
+            .logo-container img {
+                max-width: 100%;
+                height: auto;
+                max-height: 120px;
+            }
+            .title-separator {
+                width: 100%;
+                height: 2px;
+                background: linear-gradient(90deg, transparent, #667eea, transparent);
+                margin: 1rem 0;
+            }
+            .text-muted {
+                color: #6c757d !important;
+            }
+            @media (max-width: 576px) {
+                .card {
+                    margin: 10px;
+                    padding: 2rem 1.5rem !important;
+                }
+                body {
+                    padding: 10px 5px;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container d-flex align-items-center justify-content-center min-vh-100">
+            <div class="card p-5 w-100" style="max-width: 500px;">
+                        <div class="logo-container">
+                            <img src="/img/Phka Ramdol.png" alt="Logo">
+                        </div>
+                        <div class="title-separator"></div>
+                        <h1>🎥 BORADER</h1>
+                        <div class="title-separator"></div>
+                <p class="text-center text-muted mb-4">Download videos from YouTube, TikTok, and more in MP4 format</p>
+                <form method="post" class="mb-3">
+                    <div class="mb-3">
+                        <label for="url" class="form-label fw-bold">Video URL</label>
+                        <input type="url" class="form-control form-control-lg" id="url" name="url" placeholder="https://www.youtube.com/watch?v=..." required>
+                    </div>
+                    <button type="submit" class="btn btn-download btn-lg w-100 text-white fw-bold">⬇️ Download Video</button>
+                </form>
+                <div class="text-center">
+                    <small class="text-muted">Fast, secure, and free. No registration required.</small><br>
+                    <small class="text-muted">📱 Mobile users: Videos download to your device's default Downloads folder. You can move them to Gallery from there.</small>
+                </div>
+            </div>
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    </body>
+    </html>
+    ''')
+
+if __name__ == '__main__':
+    app.run(debug=True)

@@ -1,0 +1,12 @@
+name = "video-downloader"
+main = "app.py"
+compatibility_date = "2024-01-01"
+compatibility_flags = ["python_workers"]
+
+[build]
+command = "pip install -r requirements.txt"
+
+[[build.upload]]
+format = "modules"
+dir = "."
+include = ["app.py", "requirements.txt"]
