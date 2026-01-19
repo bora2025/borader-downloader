@@ -6,6 +6,7 @@ A powerful application to download videos from YouTube and TikTok with advanced 
 
 - **Advanced YouTube Bypass**: Multiple player clients, Android emulation, geo-bypass, and anti-bot countermeasures
 - **Direct Downloads**: No authentication required - just paste URL and download
+- **Network Resilience**: Automatic retry mechanisms with exponential backoff for stable downloads
 - **Multi-Platform**: Desktop GUI, CLI, and web app versions
 - **High Compatibility**: Works with YouTube, TikTok, and many other platforms
 - **Mobile Friendly**: PWA support for mobile devices
