@@ -1,6 +1,14 @@
-# BORADER
+# BORADER - Power Video Downloader
 
-A simple application to download videos from YouTube and TikTok, available as desktop app, CLI, and web app.
+A powerful application to download videos from YouTube and TikTok with advanced bypass techniques, available as desktop app, CLI, and web app.
+
+## 🚀 Power Toolkit Features
+
+- **Advanced YouTube Bypass**: Multiple player clients, Android emulation, geo-bypass, and anti-bot countermeasures
+- **Optional Cookie Support**: Upload browser cookies for age-restricted or private videos
+- **Multi-Platform**: Desktop GUI, CLI, and web app versions
+- **High Compatibility**: Works with YouTube, TikTok, and many other platforms
+- **Mobile Friendly**: PWA support for mobile devices
 
 ## Requirements
 
@@ -52,13 +60,29 @@ python main.py "URL" --output /path/to/downloads
 Videos will be downloaded in MP4 format for maximum compatibility with media players.
 
 ### Web App Mode
-Run the Flask web application:
+Access the web version at: https://borader.vercel.app
 
+**🚀 Power Toolkit Features:**
+- Advanced YouTube bypass with multiple player clients
+- Android client emulation for maximum compatibility
+- Geo-bypass and anti-bot countermeasures
+- Optional cookie upload for restricted videos
+- PWA support for mobile installation
+
+#### How to Get YouTube Cookies (for restricted videos):
+1. Install "Get cookies.txt" extension for Chrome/Firefox
+2. Visit youtube.com and log in to your account
+3. Click the extension icon
+4. Export cookies as "cookies.txt"
+5. Upload the file in the web app
+
+The web app uses advanced techniques to bypass most YouTube restrictions automatically, but cookies provide maximum compatibility for edge cases.
+
+For local development:
 ```
 python app.py
 ```
-
-Open your browser to `http://localhost:5000` and use the clean, modern web interface optimized for mobile devices with responsive logo layout. The app shows real-time download progress with an animated progress bar. Mobile users will find videos in their Downloads folder and can move them to Gallery. The app includes PWA features for installation on mobile devices.
+Open your browser to `http://localhost:5000`
 
 ## Deployment to Cloudflare
 
