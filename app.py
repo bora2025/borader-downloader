@@ -123,7 +123,7 @@ def index():
                         <h1>🎥 BORADER</h1>
                         <div class="title-separator"></div>
                         <p class="text-danger text-center">Please enter a URL</p>
-                        <form method="post" class="mb-3">
+                        <form method="post" class="mb-3" id="downloadForm">
                             <div class="mb-3">
                                 <label for="url" class="form-label">Video URL</label>
                                 <input type="url" class="form-control" id="url" name="url" placeholder="https://www.youtube.com/watch?v=..." required>
@@ -480,12 +480,41 @@ def index():
                     <button type="submit" class="btn btn-download btn-lg w-100 text-white fw-bold">⬇️ Download Video</button>
                 </form>
                 <div class="text-center">
-                    <small class="text-muted">🚀 <strong>YouTube Downloads Now Supported!</strong> Advanced bypass system for direct web downloads</small><br>
+                    <small class="text-muted">🚀 <strong>YouTube videos download instantly in Colab!</strong> Other sites download directly here</small><br>
                     <small class="text-muted">📱 Mobile users: Videos download to your device's default Downloads folder. You can move them to Gallery from there.</small>
                 </div>
             </div>
         </div>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <script>
+            document.getElementById('downloadForm').addEventListener('submit', function(e) {
+                const url = document.getElementById('url').value;
+                
+                // Check if it's a YouTube URL
+                if (url.includes('youtube.com') || url.includes('youtu.be')) {
+                    e.preventDefault(); // Stop form submission
+                    
+                    // Show loading message
+                    const button = this.querySelector('button[type="submit"]');
+                    const originalText = button.innerHTML;
+                    button.innerHTML = '🚀 Opening Colab...';
+                    button.disabled = true;
+                    
+                    // Redirect to Colab with the URL as a parameter
+                    const colabUrl = 'https://colab.research.google.com/github/bora2025/borader-downloader/blob/main/BORADER_Colab_Downloader.ipynb';
+                    window.open(colabUrl, '_blank');
+                    
+                    // Reset button after a delay
+                    setTimeout(() => {
+                        button.innerHTML = originalText;
+                        button.disabled = false;
+                    }, 2000);
+                    
+                    return false;
+                }
+                // For non-YouTube URLs, allow normal form submission
+            });
+        </script>
     </body>
     </html>
     ''')
