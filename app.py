@@ -177,7 +177,7 @@ def index():
                 # iOS client (reliable at avoiding YouTube's "Sign in to confirm
                 # you're not a bot" check without cookies, but capped ~1080p)
                 'outtmpl': os.path.join(tempfile.gettempdir(), '%(title)s.%(ext)s'),
-                'format': 'bestvideo[height<=1080][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=1080]+bestaudio/best[height<=1080]/best',
+                'format': 'bestvideo[vcodec^=avc1][height<=1080]+bestaudio[acodec^=mp4a]/bestvideo[height<=1080][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=1080]+bestaudio/best[height<=1080]/best',
                 'merge_output_format': 'mp4',
                 'cookiefile': cookies_path,
                 'http_headers': {
@@ -202,7 +202,7 @@ def index():
                 # Premium: best quality up to 4K, works best with cookies for
                 # full authenticated access to the highest resolutions
                 'outtmpl': os.path.join(tempfile.gettempdir(), '%(title)s.%(ext)s'),
-                'format': 'bestvideo[height<=2160][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=2160]+bestaudio/best[ext=mp4]/best',
+                'format': 'bestvideo[vcodec^=avc1][height<=2160]+bestaudio[acodec^=mp4a]/bestvideo[height<=2160][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=2160]+bestaudio/best[ext=mp4]/best',
                 'merge_output_format': 'mp4',
                 'cookiefile': cookies_path,
                 'http_headers': {
@@ -234,7 +234,7 @@ def index():
                 # Strategy: Mobile YouTube client (bypasses many restrictions)
                 {
                     'outtmpl': os.path.join(tempfile.gettempdir(), '%(title)s.%(ext)s'),
-                    'format': 'bestvideo[height<=720]+bestaudio/best[height<=720]/best',
+                    'format': 'bestvideo[vcodec^=avc1][height<=720]+bestaudio[acodec^=mp4a]/bestvideo[height<=720][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=720]+bestaudio/best[height<=720]/best',
                     'merge_output_format': 'mp4',
                     'cookiefile': cookies_path,
                     'http_headers': {
@@ -259,7 +259,7 @@ def index():
                 # Strategy 4: Universal fallback (works for most platforms)
                 {
                     'outtmpl': os.path.join(tempfile.gettempdir(), '%(title)s.%(ext)s'),
-                    'format': 'best[ext=mp4]/best',
+                    'format': 'best[vcodec^=avc1][ext=mp4]/best[ext=mp4]/best',
                     'cookiefile': cookies_path,
                     'http_headers': {
                         'User-Agent': 'Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Mobile Safari/537.36',
