@@ -173,60 +173,65 @@ def index():
             is_youtube = 'youtube.com' in url or 'youtu.be' in url
 
             # Enhanced multi-strategy system optimized for YouTube and other platforms
-            strategies = [
-                # Strategy 1: iOS client (currently the most reliable at avoiding
-                # YouTube's "Sign in to confirm you're not a bot" check without cookies)
-                {
-                    'outtmpl': os.path.join(tempfile.gettempdir(), '%(title)s.%(ext)s'),
-                    'format': 'bestvideo[height<=1080][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=1080]+bestaudio/best[height<=1080]/best',
-                    'merge_output_format': 'mp4',
-                    'cookiefile': cookies_path,
-                    'http_headers': {
-                        'User-Agent': 'com.google.ios.youtube/19.29.1 (iPhone16,2; U; CPU iOS 17_5_1 like Mac OS X)',
-                        'Accept-Language': 'en-US,en;q=0.9',
-                    },
-                    'geo_bypass': True,
-                    'nocheckcertificate': True,
-                    'retries': 15,
-                    'fragment_retries': 15,
-                    'socket_timeout': 45,
-                    'sleep_interval': 1,
-                    'max_sleep_interval': 3,
-                    'extractor_args': {
-                        'youtube': {
-                            'player_client': ['ios'],
-                            'player_skip': ['webpage'],
-                        }
-                    },
+            ios_strategy = {
+                # iOS client (reliable at avoiding YouTube's "Sign in to confirm
+                # you're not a bot" check without cookies, but capped ~1080p)
+                'outtmpl': os.path.join(tempfile.gettempdir(), '%(title)s.%(ext)s'),
+                'format': 'bestvideo[height<=1080][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=1080]+bestaudio/best[height<=1080]/best',
+                'merge_output_format': 'mp4',
+                'cookiefile': cookies_path,
+                'http_headers': {
+                    'User-Agent': 'com.google.ios.youtube/19.29.1 (iPhone16,2; U; CPU iOS 17_5_1 like Mac OS X)',
+                    'Accept-Language': 'en-US,en;q=0.9',
                 },
-                # Strategy 2: Premium YouTube with cookies (best for authenticated access)
-                {
-                    'outtmpl': os.path.join(tempfile.gettempdir(), '%(title)s.%(ext)s'),
-                    'format': 'bestvideo[height<=2160][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=2160]+bestaudio/best[ext=mp4]/best',
-                    'merge_output_format': 'mp4',
-                    'cookiefile': cookies_path,
-                    'http_headers': {
-                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
-                        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-                        'Accept-Language': 'en-US,en;q=0.9',
-                        'Referer': 'https://www.youtube.com/',
-                        'DNT': '1',
-                    },
-                    'geo_bypass': True,
-                    'nocheckcertificate': True,
-                    'retries': 15,
-                    'fragment_retries': 15,
-                    'socket_timeout': 45,
-                    'sleep_interval': 1,
-                    'max_sleep_interval': 3,
-                    'extractor_args': {
-                        'youtube': {
-                            'player_client': ['web', 'tv_embedded', 'ios'],
-                            'player_skip': ['js', 'webpage'],
-                        }
-                    } if not has_cookies else {},
+                'geo_bypass': True,
+                'nocheckcertificate': True,
+                'retries': 15,
+                'fragment_retries': 15,
+                'socket_timeout': 45,
+                'sleep_interval': 1,
+                'max_sleep_interval': 3,
+                'extractor_args': {
+                    'youtube': {
+                        'player_client': ['ios'],
+                        'player_skip': ['webpage'],
+                    }
                 },
-                # Strategy 3: Mobile YouTube client (bypasses many restrictions)
+            }
+            premium_strategy = {
+                # Premium: best quality up to 4K, works best with cookies for
+                # full authenticated access to the highest resolutions
+                'outtmpl': os.path.join(tempfile.gettempdir(), '%(title)s.%(ext)s'),
+                'format': 'bestvideo[height<=2160][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=2160]+bestaudio/best[ext=mp4]/best',
+                'merge_output_format': 'mp4',
+                'cookiefile': cookies_path,
+                'http_headers': {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                    'Accept-Language': 'en-US,en;q=0.9',
+                    'Referer': 'https://www.youtube.com/',
+                    'DNT': '1',
+                },
+                'geo_bypass': True,
+                'nocheckcertificate': True,
+                'retries': 15,
+                'fragment_retries': 15,
+                'socket_timeout': 45,
+                'sleep_interval': 1,
+                'max_sleep_interval': 3,
+                'extractor_args': {
+                    'youtube': {
+                        'player_client': ['web', 'tv_embedded', 'ios'],
+                        'player_skip': ['js', 'webpage'],
+                    }
+                } if not has_cookies else {},
+            }
+            # When cookies are available, try the premium (up to 4K) strategy
+            # first since it isn't artificially capped at 1080p like the iOS
+            # strategy. Without cookies, prioritize iOS for bot-check bypass.
+            strategies = [premium_strategy, ios_strategy] if has_cookies else [ios_strategy, premium_strategy]
+            strategies += [
+                # Strategy: Mobile YouTube client (bypasses many restrictions)
                 {
                     'outtmpl': os.path.join(tempfile.gettempdir(), '%(title)s.%(ext)s'),
                     'format': 'bestvideo[height<=720]+bestaudio/best[height<=720]/best',
