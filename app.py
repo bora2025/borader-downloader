@@ -529,7 +529,7 @@ def index():
                         <h1>🎥 BORADER</h1>
                         <div class="title-separator"></div>
                 <p class="text-center text-muted mb-4">Download videos from YouTube, TikTok, and more in MP4 format</p>
-                <form method="post" class="mb-3">
+                <form method="post" class="mb-3" id="downloadForm">
                     <div class="mb-3">
                         <label for="url" class="form-label fw-bold">Video URL</label>
                         <input type="url" class="form-control form-control-lg" id="url" name="url" placeholder="https://www.youtube.com/watch?v=..." required>
