@@ -3,7 +3,7 @@ import yt_dlp
 import tempfile
 import os
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='public', static_url_path='')
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -564,4 +564,6 @@ def index():
     ''')
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    debug = os.environ.get('FLASK_DEBUG', 'false').lower() == 'true'
+    app.run(host='0.0.0.0', port=port, debug=debug)
