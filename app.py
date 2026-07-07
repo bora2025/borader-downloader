@@ -5,6 +5,31 @@ import os
 
 app = Flask(__name__, static_folder='public', static_url_path='')
 
+
+def get_cookies_path():
+    """Resolve a cookies.txt file path.
+
+    Priority:
+    1. A cookies.txt file committed/mounted next to app.py (local dev only).
+    2. A YOUTUBE_COOKIES environment variable (Netscape cookie file contents),
+       useful for deployments like Railway where you can't commit cookies.txt.
+       Set it in the service's environment variables/secrets.
+    """
+    local_path = os.path.join(os.path.dirname(__file__), 'cookies.txt')
+    if os.path.exists(local_path):
+        return local_path
+
+    cookies_env = os.environ.get('YOUTUBE_COOKIES')
+    if cookies_env:
+        env_path = os.path.join(tempfile.gettempdir(), 'youtube_cookies.txt')
+        if not os.path.exists(env_path):
+            with open(env_path, 'w', encoding='utf-8') as f:
+                f.write(cookies_env)
+        return env_path
+
+    return None
+
+
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
@@ -141,19 +166,43 @@ def index():
         
         try:
             # Enhanced YouTube download system with direct web support
-            cookies_path = os.path.join(os.path.dirname(__file__), 'cookies.txt')
-            has_cookies = os.path.exists(cookies_path)
+            cookies_path = get_cookies_path()
+            has_cookies = cookies_path is not None
 
             # Check if it's a YouTube URL - now we handle it directly!
             is_youtube = 'youtube.com' in url or 'youtu.be' in url
 
             # Enhanced multi-strategy system optimized for YouTube and other platforms
             strategies = [
-                # Strategy 1: Premium YouTube with cookies (best for authenticated access)
+                # Strategy 1: iOS client (currently the most reliable at avoiding
+                # YouTube's "Sign in to confirm you're not a bot" check without cookies)
+                {
+                    'outtmpl': os.path.join(tempfile.gettempdir(), '%(title)s.%(ext)s'),
+                    'format': 'best[height<=1080]/best',
+                    'cookiefile': cookies_path,
+                    'http_headers': {
+                        'User-Agent': 'com.google.ios.youtube/19.29.1 (iPhone16,2; U; CPU iOS 17_5_1 like Mac OS X)',
+                        'Accept-Language': 'en-US,en;q=0.9',
+                    },
+                    'geo_bypass': True,
+                    'nocheckcertificate': True,
+                    'retries': 15,
+                    'fragment_retries': 15,
+                    'socket_timeout': 45,
+                    'sleep_interval': 1,
+                    'max_sleep_interval': 3,
+                    'extractor_args': {
+                        'youtube': {
+                            'player_client': ['ios'],
+                            'player_skip': ['webpage'],
+                        }
+                    },
+                },
+                # Strategy 2: Premium YouTube with cookies (best for authenticated access)
                 {
                     'outtmpl': os.path.join(tempfile.gettempdir(), '%(title)s.%(ext)s'),
                     'format': 'bestvideo[ext=mp4][height<=1080]+bestaudio[ext=m4a]/best[ext=mp4]/best',
-                    'cookiefile': cookies_path if has_cookies else None,
+                    'cookiefile': cookies_path,
                     'http_headers': {
                         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
                         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
@@ -170,16 +219,16 @@ def index():
                     'max_sleep_interval': 3,
                     'extractor_args': {
                         'youtube': {
-                            'player_client': ['android', 'web'],
+                            'player_client': ['android', 'web', 'tv_embedded'],
                             'player_skip': ['js', 'webpage'],
                         }
                     } if not has_cookies else {},
                 },
-                # Strategy 2: Mobile YouTube client (bypasses many restrictions)
+                # Strategy 3: Mobile YouTube client (bypasses many restrictions)
                 {
                     'outtmpl': os.path.join(tempfile.gettempdir(), '%(title)s.%(ext)s'),
                     'format': 'best[height<=720]/best',
-                    'cookiefile': cookies_path if has_cookies else None,
+                    'cookiefile': cookies_path,
                     'http_headers': {
                         'User-Agent': 'com.google.android.youtube/19.09.36 (Linux; U; Android 11; en_US) gzip',
                         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
@@ -194,16 +243,16 @@ def index():
                     'max_sleep_interval': 5,
                     'extractor_args': {
                         'youtube': {
-                            'player_client': ['android'],
+                            'player_client': ['android', 'tv_embedded'],
                             'player_skip': ['js'],
                         }
                     } if not has_cookies else {},
                 },
-                # Strategy 3: Universal fallback (works for most platforms)
+                # Strategy 4: Universal fallback (works for most platforms)
                 {
                     'outtmpl': os.path.join(tempfile.gettempdir(), '%(title)s.%(ext)s'),
                     'format': 'best[ext=mp4]/best',
-                    'cookiefile': cookies_path if has_cookies else None,
+                    'cookiefile': cookies_path,
                     'http_headers': {
                         'User-Agent': 'Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Mobile Safari/537.36',
                         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
@@ -217,7 +266,7 @@ def index():
                     'sleep_interval': 3,
                     'max_sleep_interval': 8,
                 },
-                # Strategy 4: Minimal requirements fallback
+                # Strategy 5: Minimal requirements fallback
                 {
                     'outtmpl': os.path.join(tempfile.gettempdir(), '%(title)s.%(ext)s'),
                     'format': 'worst[ext=mp4]/worst',
