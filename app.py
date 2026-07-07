@@ -310,34 +310,19 @@ def index():
             # Enhanced error handling with YouTube-specific guidance
             if is_youtube:
                 if "Sign in to confirm" in error_msg or "confirm you're not a bot" in error_msg or "HTTP Error 403" in error_msg:
-                    error_msg = """This YouTube video requires additional authentication.
-
-🧪 <strong>Alternative: Use Google Colab</strong>
-<a href="https://colab.research.google.com/github/bora2025/borader-downloader/blob/main/BORADER_Colab_Downloader.ipynb" target="_blank" class="btn btn-primary">🚀 Open Colab Notebook</a>
-
-✅ <strong>Works for ALL YouTube videos instantly!</strong>"""
+                    error_msg = "This YouTube video requires additional authentication and could not be downloaded. Please try a different video."
                 elif "Video unavailable" in error_msg or "This video is not available" in error_msg:
                     error_msg = "This YouTube video is not available. It may be private, deleted, or region-restricted."
                 elif "Private video" in error_msg:
                     error_msg = "This is a private YouTube video that cannot be downloaded."
                 elif "Age-restricted" in error_msg or "age-restricted" in error_msg:
-                    error_msg = """This YouTube video is age-restricted.
-
-🧪 <strong>Alternative: Use Google Colab</strong>
-<a href="https://colab.research.google.com/github/bora2025/borader-downloader/blob/main/BORADER_Colab_Downloader.ipynb" target="_blank" class="btn btn-primary">🚀 Open Colab Notebook</a>
-
-✅ <strong>Works for age-restricted videos instantly!</strong>"""
+                    error_msg = "This YouTube video is age-restricted and could not be downloaded."
                 elif "Region blocked" in error_msg or "not available in your country" in error_msg:
                     error_msg = "This YouTube video is blocked in your region. Try using a VPN."
                 elif "quota" in error_msg.lower():
                     error_msg = "YouTube API quota exceeded. Please try again later."
                 else:
-                    error_msg = f"""YouTube download attempted with 4 enhanced strategies.
-
-🧪 <strong>Alternative: Use Google Colab</strong>
-<a href="https://colab.research.google.com/github/bora2025/borader-downloader/blob/main/BORADER_Colab_Downloader.ipynb" target="_blank" class="btn btn-primary">🚀 Open Colab Notebook</a>
-
-✅ <strong>Works for ALL YouTube videos instantly!</strong>"""
+                    error_msg = "YouTube download failed after trying multiple strategies. Please try a different video."
             else:
                 # Handle non-YouTube errors normally
                 if "Video unavailable" in error_msg or "This video is not available" in error_msg:
@@ -537,85 +522,12 @@ def index():
                     <button type="submit" class="btn btn-download btn-lg w-100 text-white fw-bold">⬇️ Download Video</button>
                 </form>
                 <div class="text-center">
-                    <small class="text-muted">🚀 <strong>YouTube videos download instantly in Colab!</strong> Other sites download directly here</small><br>
+                    <small class="text-muted">🚀 <strong>YouTube, TikTok, Instagram, Twitter, and 1000+ sites supported!</strong></small><br>
                     <small class="text-muted">📱 Mobile users: Videos download to your device's default Downloads folder. You can move them to Gallery from there.</small>
                 </div>
             </div>
         </div>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-        <script>
-            document.getElementById('downloadForm').addEventListener('submit', function(e) {
-                const url = document.getElementById('url').value;
-
-                // Check if it's a YouTube URL
-                if (url.includes('youtube.com') || url.includes('youtu.be')) {
-                    e.preventDefault(); // Stop form submission
-
-                    // Show Colab modal instead of direct redirect
-                    showColabModal(url);
-
-                    return false;
-                }
-                // For non-YouTube URLs, allow normal form submission
-            });
-
-            function showColabModal(videoUrl) {
-                // Create modal HTML
-                const modalHtml = `
-                    <div class="modal fade" id="colabModal" tabindex="-1">
-                        <div class="modal-dialog modal-dialog-centered">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title">🎥 YouTube Download</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                </div>
-                                <div class="modal-body text-center">
-                                    <p>YouTube videos download best in Google Colab!</p>
-                                    <div class="mb-3">
-                                        <strong>Your URL:</strong><br>
-                                        <code class="text-break">${videoUrl}</code>
-                                    </div>
-                                    <p>Click below to open Colab and download instantly:</p>
-                                </div>
-                                <div class="modal-footer justify-content-center">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                    <a href="#" class="btn btn-primary" id="startColabDownload">
-                                        🚀 Start Download in Colab
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-
-                // Add modal to page
-                document.body.insertAdjacentHTML('beforeend', modalHtml);
-
-                // Show modal
-                const modal = new bootstrap.Modal(document.getElementById('colabModal'));
-                modal.show();
-
-                // Set up download button
-                document.getElementById('startColabDownload').addEventListener('click', function(e) {
-                    e.preventDefault();
-                    
-                    // Encode the video URL for the fragment
-                    const encodedUrl = encodeURIComponent(videoUrl);
-                    const colabUrl = `https://colab.research.google.com/github/bora2025/borader-downloader/blob/main/BORADER_Colab_Downloader_v3.ipynb#video_url=${encodedUrl}`;
-                    
-                    // Open Colab with the URL
-                    window.open(colabUrl, '_blank');
-                    
-                    // Close modal
-                    modal.hide();
-                });
-
-                // Clean up modal after it's hidden
-                document.getElementById('colabModal').addEventListener('hidden.bs.modal', function() {
-                    this.remove();
-                });
-            }
-        </script>
     </body>
     </html>
     ''')
